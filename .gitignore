@@ -8,3 +8,11 @@ wheels/
 
 # Virtual environments
 .venv
+
+# Optuna study database
+*.db
+optuna_study/
+
+# Numpy/data artifacts
+*.npy
+*.npz
