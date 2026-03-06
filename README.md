@@ -89,6 +89,6 @@ crash.
 ## References
 
 - [ArrowSpace — Journal of Open Source Software](https://joss.theoj.org/papers/10.21105/joss.09002.pdf)
-- [MRR-Top0: Topology-Aware MRR Extension](mrr-top0-paper.pdf)
+- [MRR-Top0: Topology-Aware MRR Extension](docs/mrr-top0-paper.pdf)
 
 
