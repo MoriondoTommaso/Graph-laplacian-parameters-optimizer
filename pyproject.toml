@@ -1,0 +1,11 @@
+[project]
+name = "graphlaplacianoptimizer"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "arrowspace>=0.25.14",
+    "numpy>=2.4.2",
+    "optuna>=4.7.0",
+]
