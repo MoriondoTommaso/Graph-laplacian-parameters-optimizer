@@ -16,3 +16,8 @@ optuna_study/
 # Numpy/data artifacts
 *.npy
 *.npz
+
+# Dataset files — too large for git
+data/
+*.hdf5
+*.h5
