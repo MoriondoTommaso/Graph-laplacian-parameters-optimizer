@@ -1,7 +1,7 @@
 [project]
 name = "graphlaplacianoptimizer"
 version = "0.1.0"
-description = "Add your description here"
+description = "Bayesian optimizer for pyarrowspace graph Laplacian parameters"
 readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
@@ -12,12 +12,13 @@ dependencies = [
 
 [project.optional-dependencies]
 dev = [
-    "optuna-dashboard>=0.17.0", # optional: visual trial monitoring
-    "pytest>=9.0.2", 
+    "optuna-dashboard>=0.17.0",
+    "pytest>=9.0.2",
 ]
 
 [project.scripts]
 optimize = "graphlaplacianoptimizer._optimizer:main"
 
-
-
+[tool.pytest.ini_options]
+# Tells pytest where to look for tests — no need to specify the folder manually.
+testpaths = ["tests"]
