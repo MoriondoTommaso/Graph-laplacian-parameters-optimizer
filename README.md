@@ -48,7 +48,7 @@ pruned immediately so Optuna avoids that region of parameter space.
 ## Installation
 
 ```bash
-git clone <your-repo-url>
+git clone https://github.com/MoriondoTommaso/Graph-laplacian-parameters-optimizer.git
 cd arrowspace-opt
 uv sync
 uv pip install -e .
