@@ -179,7 +179,72 @@ main()
           │
           └── each trial calls _objective.py → _isolated_build.py → Rust
 ```
+**SIFT‑128‑Euclidean dataset link** + **updated documentation**:
 
+## Dataset SIFT‑1M (your file)
+
+```
+data/sift-128-euclidean.hdf5
+├── train: (1,000,000, 128) float32 → your subsets
+├── query: (10,000, 128) 
+├── neighbors: (10,000, 100) int32 ground truth
+└── distances: (10,000, 100) float32
+```
+
+**Direct download** (backup):
+```
+https://ann-benchmarks.com/datasets/sift-128-euclidean.hdf5  # 501MB [web:6]
+# or
+huggingface.co/datasets/open-vdb/sift-128-euclidean [web:149]
+```
+
+## Updated README.md section
+
+# Graph Laplacian Parameter Optimizer
+Bayesian tuning of ArrowSpace graphs for spectral topology (Fiedler + gap).
+
+## Stage A: Spectral Topology ✓ VALIDATED
+
+### SIFT‑128‑Euclidean Results
+
+| Dataset | Baseline λ₂ | Best λ₂ | Improvement | Best Params |
+|---------|-------------|---------|-------------|-------------|
+| 1k      | 5.8e-5     | **0.202** | **347x** | eps=0.027, k=20 [file:120] |
+| 4k      | 5.6e-5     | **0.049** | **86x**  | eps=0.050, k=24 [file:135] |
+
+**Pattern**: Optuna finds tight `eps`/`sigma` → dense/connected graphs.
+
+### Scaling Limits
+```
+4k: ✅ Stable (20 trials ~10min)
+5k+: ⚠️ Rust sparse heap (~40k edges)
+1M: 🔄 Sharding 250×4k
+```
+
+### Production Workflow
+```
+1. Tune 4k subset (10min)
+2. Best params → 1M full build (sharding overnight)
+3. Precompute lambda scalars → O(1) tau-mode query
+```
+
+## Usage
+```bash
+uv run python test_sift_topology.py  # Auto-save results/
+```
+
+## Next: Stage 2 Retrieval 
+MRR-Top0/NDCG/tail metrics with best spectral params vs cosine baseline.
+
+
+## Verify dataset
+
+```bash
+# File info
+h5dump -H data/sift-128-euclidean.hdf5 | head -20
+
+# Fresh download 
+wget https://ann-benchmarks.com/datasets/sift-128-euclidean.hdf5 -O data/sift-backup.hdf5
 
 ## References
 
