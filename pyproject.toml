@@ -16,7 +16,7 @@ dependencies = [
 
 [tool.setuptools.packages.find]
 where = ["."]
-include = ["graphlaplacianoptimizer*", "benchmarks*"]
+include = ["graphlaplacianoptimizer*", "benchmarks*","sift-128*"]
 
 [project.optional-dependencies]
 dev = [
@@ -30,3 +30,7 @@ optimize = "graphlaplacianoptimizer._optimizer:main"
 [tool.pytest.ini_options]
 # Tells pytest where to look for tests — no need to specify the folder manually.
 testpaths = ["tests"]
+
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
