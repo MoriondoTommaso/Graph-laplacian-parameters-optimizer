@@ -54,7 +54,10 @@ def run_isolated_build(graph_params: dict, items: np.ndarray) -> list[float] | N
 
     # Wait up to 60 seconds for the build to complete.
     # If the subprocess hangs (e.g., Rust deadlock), we don't block forever.
-    p.join(timeout=60)
+    n_items = items.shape[0]
+    timeout = max(5000, min(300, 0.003 * n_items))  # 10k→60s, 50k→120s, cap 5min
+    print(f"DEBUG: timeout={timeout}s for n={n_items}")
+    p.join(timeout=timeout)
 
     # A non-zero exit code means the subprocess crashed (e.g., Rust panic
     # that was not caught by the try/except). Return None so Optuna
