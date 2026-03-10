@@ -5,46 +5,27 @@ from graphlaplacianoptimizer._isolated_build import run_isolated_build
 
 
 def make_objective(items: np.ndarray):
-    # Validate dtype here once, at factory time, not on every trial.
-    # This enforces the FFI safety rule before Optuna even starts.
-    assert items.dtype == np.float64, (
-        f"items must be np.float64, got {items.dtype}"
-    )
 
-    # Read dataset shape once. These values are used to set param bounds
-    # that are safe for this specific dataset.
+    assert items.dtype == np.float64, f"items must be np.float64, got {items.dtype}"
+    
     n_items, n_features = items.shape
-
+    
+    # SAFE BOUNDS ← ADD THIS BLOCK
+    max_edges = 30000  
+    safe_k_max = min(n_features // 2, max_edges // max(1, n_items))
+    
     def objective(trial: optuna.Trial) -> float:
-        # --- Parameter suggestion ---
-        # Each suggest_* call asks Optuna to pick a value within the given
-        # bounds. Optuna uses past trial results (Bayesian inference via TPE)
-        # to pick values more likely to score well — not random sampling.
 
-        # eps: log=True means Optuna searches on a log scale.
-        # This is correct because eps matters more at small values
-        # (0.01 vs 0.05 is a big difference) than at large ones
-        # (0.4 vs 0.45 barely differs).
-        eps = trial.suggest_float("eps", 0.01, 0.5, log=True)
-
-        # k: number of nearest neighbours for graph wiring.
-        # Lower bound 2: minimum for a connected graph.
-        # Upper bound n_features // 2: matches the example in project docs.
-        k = trial.suggest_int("k", 2, n_features // 2)
-
-        # topk: how many results the search returns per query.
-        # Must be at least 1 and less than total items.
+        eps = trial.suggest_float("eps", 0.01, 0.3, log=True)  # tighter too
+        
+        k = trial.suggest_int("k", 2, safe_k_max)  # ← CHANGED
+        
         topk = trial.suggest_int("topk", 1, n_items - 1)
 
-        # p: Minkowski exponent. p=1 is Manhattan, p=2 is Euclidean.
-        # We search between 1.0 and 3.0 — values beyond 3 are rarely useful.
         p = trial.suggest_float("p", 1.0, 3.0)
 
-        # sigma: Gaussian kernel bandwidth. Controls edge weight smoothness.
-        # log=True for the same reason as eps — small values matter more.
-        # This is the most sensitive parameter for the Fiedler value.
         sigma = trial.suggest_float("sigma", 0.01, 1.0, log=True)
-
+        
         graph_params = {
             "eps":   eps,
             "k":     k,

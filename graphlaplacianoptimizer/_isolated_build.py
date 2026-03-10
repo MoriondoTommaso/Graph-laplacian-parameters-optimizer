@@ -46,18 +46,20 @@ def run_isolated_build(graph_params: dict, items: np.ndarray) -> list[float] | N
     # any Rust-allocated objects in the parent's memory space.
     ctx = mp.get_context("spawn")
     q = ctx.Queue()
-
+    print("DEBUG: spawned queque")
     # Pass graph_params and items to the worker via constructor arguments.
     # These are serialised through pickle when the process spawns.
     p = ctx.Process(target=_build_worker, args=(graph_params, items, q))
     p.start()
-
+    print("DEBUG: _build_worker launched")
     # Wait up to 60 seconds for the build to complete.
     # If the subprocess hangs (e.g., Rust deadlock), we don't block forever.
-    n_items = items.shape[0]
-    timeout = max(5000, min(300, 0.003 * n_items))  # 10k→60s, 50k→120s, cap 5min
-    print(f"DEBUG: timeout={timeout}s for n={n_items}")
-    p.join(timeout=timeout)
+    try:
+        p.join(timeout=30)  # 30s MAX per trial
+    except mp.TimeoutError:
+        p.terminate()
+        p.join()
+        return None
 
     # A non-zero exit code means the subprocess crashed (e.g., Rust panic
     # that was not caught by the try/except). Return None so Optuna
@@ -68,6 +70,7 @@ def run_isolated_build(graph_params: dict, items: np.ndarray) -> list[float] | N
     # Read the result from the Queue without blocking.
     # get_nowait() raises queue.Empty if nothing was put — treated as failure.
     try:
+        print("DEBUG reading queque results")
         result = q.get_nowait()
     except Exception:
         return None
