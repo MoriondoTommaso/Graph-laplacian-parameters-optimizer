@@ -10,8 +10,10 @@ ROOT = Path.cwd().parent
 def save_spectral_test(baseline_diag, opt_diag, opt_params, dataset_info, trial_log=None):
     """Salva test completo in folder dedicato con dimensioni dataset."""
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-    n_base = dataset_info.get("n_baseline", "N/A")
-    n_opt = dataset_info.get("n_optuna", "N/A")
+    
+    # FIX: Fallback to "n" if "n_baseline" or "n_optuna" aren't explicitly provided
+    n_base = dataset_info.get("n_baseline", dataset_info.get("n", "N/A"))
+    n_opt = dataset_info.get("n_optuna", dataset_info.get("n", "N/A"))
     dim = dataset_info.get("dim", "N/A")
     
     # Crea folder benchmark dedicato
@@ -35,7 +37,9 @@ def save_spectral_test(baseline_diag, opt_diag, opt_params, dataset_info, trial_
             "delta_score": opt_diag["score"] - baseline_diag["score"],
             "pct_improvement": (opt_diag["score"] / baseline_diag["score"] - 1) * 100 
                                if baseline_diag["score"] > 0 else float('inf'),
-            "fiedler_improvement": opt_diag["spectral_gap"] - baseline_diag["spectral_gap"],
+            # FIX: Correctly track Fiedler and add Spectral Gap tracking
+            "fiedler_improvement": opt_diag["fiedler"] - baseline_diag["fiedler"],
+            "gap_improvement": opt_diag["spectral_gap"] - baseline_diag["spectral_gap"]
         },
         "trial_log": trial_log,
     }
@@ -56,12 +60,14 @@ def save_spectral_test(baseline_diag, opt_diag, opt_params, dataset_info, trial_
     
     print(f"✅ Saved benchmark folder: {bench_folder}")
     print(f"   Δ Score: {master['improvement']['delta_score']:+.6f}")
-    print(f"   Improvement: {master['improvement']['pct_improvement']:.1f}x")
+    # FIX: Changed 'x' to '%' since the math calculates a percentage
+    print(f"   Improvement: {master['improvement']['pct_improvement']:+.1f}%")
 
 
 def save_trial_log(trials_df, dataset_info):
     """Salva log trials in folder dedicato."""
-    n_opt = dataset_info.get("n_optuna", "N/A")
+    # FIX: Fallback to "n" here as well
+    n_opt = dataset_info.get("n_optuna", dataset_info.get("n", "N/A"))
     dim = dataset_info.get("dim", 128)
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
     

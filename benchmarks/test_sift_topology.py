@@ -3,11 +3,11 @@ from pathlib import Path
 import numpy as np
 
 from benchmarks.sift_loader import load_sift
-from graphlaplacianoptimizer._build_direct import build_direct  # Your fixed version
+from graphlaplacianoptimizer._build_direct import build_direct
 from graphlaplacianoptimizer._objective import make_objective
 from save_results import save_spectral_test, save_trial_log
 
-def spectral_score(lambdas):  # FIXED: proper normalized gap
+def spectral_score(lambdas):
     """Maximize spectral gap / Fiedler = λ₂/λ₁ (cluster quality)."""
     l1, l2 = lambdas[1], lambdas[2]
     return (l2 - l1) / l1 if l1 > 0 else 0.0
@@ -21,7 +21,9 @@ def main():
     baseline_params = {'eps': 0.05, 'k': 4, 'topk': 50, 'p': 2.0, 'sigma': 0.1}
     
     baseline_lambdas_raw = build_direct(baseline_params, full_items)
-    baseline_lambdas = np.array(baseline_lambdas_raw).flatten()
+    
+    # FIX: Extract the eigenvalue (index 0 of the tuple) to ignore the node indices
+    baseline_lambdas = np.array([lam[0] for lam in baseline_lambdas_raw])
     
     baseline_diag = {
         'fiedler': float(baseline_lambdas[1]),
@@ -39,7 +41,7 @@ def main():
         load_if_exists=True,
     )
     
-    objective = make_objective(full_items)  # Assumes it uses build_direct + spectral_score
+    objective = make_objective(full_items)  # Assumes it uses build_direct + spectral_score internally
     study.optimize(objective, n_trials=20)  # Continues from existing trials
     
     opt_params = study.best_params  # NO topk override
@@ -48,7 +50,9 @@ def main():
     
     print("\n=== STEP 3: BEST PARAMS VALIDATION ===")
     opt_lambdas_raw = build_direct(opt_params, full_items)
-    opt_lambdas = np.array(opt_lambdas_raw).flatten()
+    
+    # FIX: Extract the eigenvalue here as well
+    opt_lambdas = np.array([lam[0] for lam in opt_lambdas_raw])
     
     opt_diag = {
         'fiedler': float(opt_lambdas[1]),

@@ -1,6 +1,6 @@
 import optuna
 import numpy as np
-from graphlaplacianoptimizer._build_direct import build_direct  # ← CAMBIO
+from graphlaplacianoptimizer._build_direct import build_direct
 
 def make_objective(items: np.ndarray):
     assert items.dtype == np.float64
@@ -17,12 +17,20 @@ def make_objective(items: np.ndarray):
         params = {"eps": eps, "k": k, "topk": topk, "p": p, "sigma": sigma}
         
         # SINGLE THREAD build → NO deadlock!
-        lambdas_raw = build_direct(params, items)  # returns lambdas list
+        lambdas_raw = build_direct(params, items)
         
-        lambdas = [lam[0] for lam in lambdas_raw] if lambdas_raw else []
-        
-        if len(lambdas) < 2 or lambdas[1] == 0.0:
+        if not lambdas_raw:
             raise optuna.TrialPruned()
             
-        return lambdas[0] + (lambdas[1] - lambdas[0])
+        # Extract only the eigenvalues (index 0 of the tuple)
+        lambdas = [lam[0] for lam in lambdas_raw]
+        
+        # We need at least 3 eigenvalues to calculate spectral gap (λ2 - λ1)
+        # Prune if the graph is disconnected (λ1 == 0.0) or too small
+        if len(lambdas) < 3 or lambdas[1] == 0.0:
+            raise optuna.TrialPruned()
+            
+        # Maximize the normalized spectral gap: (λ2 - λ1) / λ1
+        return (lambdas[2] - lambdas[1]) / lambdas[1]
+        
     return objective
