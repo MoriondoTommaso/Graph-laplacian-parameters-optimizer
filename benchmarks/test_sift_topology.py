@@ -1,38 +1,61 @@
-#!/usr/bin/env python
 import optuna
 from pathlib import Path
+import numpy as np
 
 from benchmarks.sift_loader import load_sift
-from benchmarks.spectral_diag import compute_spectral_diag
+from graphlaplacianoptimizer._build_direct import build_direct  # Your fixed version
 from graphlaplacianoptimizer._objective import make_objective
 from save_results import save_spectral_test, save_trial_log
 
-def main():
-    # Full dataset for evaluation
-    print("=== STEP 1: BASELINE ===")
-    full_items = load_sift(n_subset=5000)
-    baseline_params = {'eps': 0.05, 'k': 4, 'topk': 50, 'p': 2.0, 'sigma': 0.1}
+def spectral_score(lambdas):  # FIXED: proper normalized gap
+    """Maximize spectral gap / Fiedler = λ₂/λ₁ (cluster quality)."""
+    l1, l2 = lambdas[1], lambdas[2]
+    return (l2 - l1) / l1 if l1 > 0 else 0.0
 
-    baseline_diag = compute_spectral_diag(baseline_params, full_items)
+def main():
+    full_n = 5000
+    print("=== STEP 1: BASELINE ===")
+    
+    full_items = load_sift(n_subset=full_n).astype(np.float64)
+    
+    baseline_params = {'eps': 0.05, 'k': 4, 'topk': 50, 'p': 2.0, 'sigma': 0.1}
+    
+    baseline_lambdas_raw = build_direct(baseline_params, full_items)
+    baseline_lambdas = np.array(baseline_lambdas_raw).flatten()
+    
+    baseline_diag = {
+        'fiedler': float(baseline_lambdas[1]),
+        'spectral_gap': float(baseline_lambdas[2] - baseline_lambdas[1]),
+        'score': spectral_score(baseline_lambdas)
+    }
+    print(f"BASELINE λ[:5]: {baseline_lambdas[:5]}")
     print(f"BASELINE: {baseline_diag}")
     
-    breakpoint()
-
-    print("\n=== STEP 2: OPTIMIZE ON SUBSET ===")
-    subset_items = load_sift(n_subset=5000)  # Fast tuning
+    print("\n=== STEP 2: OPTIMIZE ===")
     study = optuna.create_study(
         direction="maximize",
-        study_name="sift_topo",
-        storage="sqlite:///sift_study.db",
+        study_name="sift_topo_5k",
+        storage="sqlite:///sift_study_5k.db",
         load_if_exists=True,
     )
-    study.optimize(make_objective(subset_items), n_trials=20)
-    opt_params = study.best_params | {"topk": 100}  # Fill missing
-    print(f"OPTIMIZED: score={study.best_value:.6f}")
-    print(f"Params: {opt_params}")
     
-    print("\n=== STEP 3: OPTIMIZED ON FULL ===")
-    opt_diag = compute_spectral_diag(opt_params, full_items)
+    objective = make_objective(full_items)  # Assumes it uses build_direct + spectral_score
+    study.optimize(objective, n_trials=20)  # Continues from existing trials
+    
+    opt_params = study.best_params  # NO topk override
+    print(f"OPTIMIZED: score={study.best_value:.6f}")
+    print(f"Best params: {opt_params}")
+    
+    print("\n=== STEP 3: BEST PARAMS VALIDATION ===")
+    opt_lambdas_raw = build_direct(opt_params, full_items)
+    opt_lambdas = np.array(opt_lambdas_raw).flatten()
+    
+    opt_diag = {
+        'fiedler': float(opt_lambdas[1]),
+        'spectral_gap': float(opt_lambdas[2] - opt_lambdas[1]),
+        'score': spectral_score(opt_lambdas)
+    }
+    print(f"OPTIMIZED λ[:5]: {opt_lambdas[:5]}")
     print(f"OPTIMIZED: {opt_diag}")
     
     print("\n=== COMPARISON ===")
@@ -42,15 +65,17 @@ def main():
     
     dataset_info = {
         "name": "SIFT-128-euclidean",
-        "n_baseline": full_items.shape[0],
-        "n_optuna": subset_items.shape[0],
+        "n": full_items.shape[0],
         "dim": full_items.shape[1],
+        "safe_k_max": 6,
+        "single_thread": True
     }
     
-    from save_results import save_spectral_test, save_trial_log
     trials_df = study.trials_dataframe()
     save_trial_log(trials_df, dataset_info)
     save_spectral_test(baseline_diag, opt_diag, opt_params, dataset_info)
+    
+    print("\n✅ 5k COMPLETE: stable single-thread tuning!")
 
 if __name__ == "__main__":
     main()

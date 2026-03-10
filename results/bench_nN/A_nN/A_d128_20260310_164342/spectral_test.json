@@ -1,0 +1,36 @@
+{
+  "timestamp": "20260310_164342",
+  "dataset": {
+    "name": "SIFT-128-euclidean",
+    "n": 5000,
+    "dim": 128,
+    "safe_k_max": 6,
+    "single_thread": true,
+    "n_samples_baseline": "N/A",
+    "n_samples_optuna": "N/A",
+    "dimension": 128
+  },
+  "baseline": {
+    "fiedler": 3732.0,
+    "spectral_gap": -3731.9677153121124,
+    "score": 0.032284687887568
+  },
+  "optimized": {
+    "fiedler": 2692.0,
+    "spectral_gap": -2691.9703364437387,
+    "score": 0.029663556261311896
+  },
+  "opt_params": {
+    "eps": 0.18410576276022084,
+    "k": 5,
+    "topk": 100,
+    "p": 1.3709765050330422,
+    "sigma": 0.7723821575789599
+  },
+  "improvement": {
+    "delta_score": -0.0026211316262561013,
+    "pct_improvement": -8.118807390625049,
+    "fiedler_improvement": 1039.9973788683737
+  },
+  "trial_log": null
+}

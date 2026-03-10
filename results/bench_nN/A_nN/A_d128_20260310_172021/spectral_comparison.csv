@@ -1,0 +1,3 @@
+fiedler,spectral_gap,score,config,n_samples,dim
+3732.0,-3731.967699841819,-0.9999913450808733,baseline,N/A,128
+1999.0,-1998.9066784818463,-0.9999533158988726,optimized,N/A,128
