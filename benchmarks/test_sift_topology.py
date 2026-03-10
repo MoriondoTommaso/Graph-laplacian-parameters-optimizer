@@ -10,21 +10,16 @@ from save_results import save_spectral_test, save_trial_log
 def main():
     # Full dataset for evaluation
     print("=== STEP 1: BASELINE ===")
-    full_items = load_sift(n_subset=4000)
-    baseline_params = {
-    "eps":   250.0,
-    "k":     8,      # << Conservative k=8
-    "topk":  50,
-    "p":     2.0,
-    "sigma": 100.0,
-}
+    full_items = load_sift(n_subset=5000)
+    baseline_params = {'eps': 0.05, 'k': 4, 'topk': 50, 'p': 2.0, 'sigma': 0.1}
 
     baseline_diag = compute_spectral_diag(baseline_params, full_items)
     print(f"BASELINE: {baseline_diag}")
     
+    breakpoint()
 
     print("\n=== STEP 2: OPTIMIZE ON SUBSET ===")
-    subset_items = load_sift(n_subset=4000)  # Fast tuning
+    subset_items = load_sift(n_subset=5000)  # Fast tuning
     study = optuna.create_study(
         direction="maximize",
         study_name="sift_topo",
