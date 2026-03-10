@@ -132,7 +132,7 @@ The codebase relies on a clean dependency chain to safely interface Python with 
 The pyarrowspace Rust backend allocates memory outside Python's GC. Two strict rules apply:
 
 1. **Never pass a Python list** to `ArrowSpaceBuilder` — always use `np.ndarray` with `dtype=np.float64`.
-2. **Always call `items.copy()**` before passing the array to the builder to prevent memory ownership conflicts.
+2. **Always call `items.copy()**` before passing the array to the builder to prevent memory ownership conflicts.**
 
 ---
 
