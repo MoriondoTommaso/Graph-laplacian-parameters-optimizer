@@ -55,7 +55,7 @@ def run_isolated_build(graph_params: dict, items: np.ndarray) -> list[float] | N
     # Wait up to 60 seconds for the build to complete.
     # If the subprocess hangs (e.g., Rust deadlock), we don't block forever.
     try:
-        p.join(timeout=30)  # 30s MAX per trial
+        p.join(timeout=60)  # 30s MAX per trial
     except mp.TimeoutError:
         p.terminate()
         p.join()
