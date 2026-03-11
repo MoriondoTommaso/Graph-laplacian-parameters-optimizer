@@ -21,3 +21,4 @@ optuna_study/
 data/
 *.hdf5
 *.h5
+*.parquet 

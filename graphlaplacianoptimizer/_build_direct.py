@@ -1,14 +1,24 @@
 from arrowspace import ArrowSpaceBuilder
 import traceback
 import numpy as np
-def build_direct(graph_params: dict, items: np.ndarray):
-    try:
-        print(f"Trial params: {graph_params}")  # debug
-        builder = (ArrowSpaceBuilder()
+import time
+
+
+def build_arrowspace(graph_params: dict,items: np.ndarray):
+    t0 = time.perf_counter()
+    builder = (ArrowSpaceBuilder()
             .with_dims_reduction(False, None)
             .with_sampling("simple", 1.0)
         )
-        aspace, _gl = builder.build(graph_params, items.copy())
+    aspace, gl = builder.build(graph_params, items.copy())
+    print(f"{(time.perf_counter() - t0):2f} ")
+    return aspace, gl 
+
+
+def build_direct(graph_params: dict, items: np.ndarray):
+    try:
+        print(f"Trial params: {graph_params}")  # debug
+        aspace, _ = build_arrowspace(graph_params,items)
         lambdas_raw = aspace.lambdas_sorted()
         return lambdas_raw  # ← returns lambdas!
     except Exception as e:
