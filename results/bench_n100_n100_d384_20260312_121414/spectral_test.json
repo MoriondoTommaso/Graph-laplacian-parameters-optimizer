@@ -1,0 +1,37 @@
+{
+  "timestamp": "20260312_121414",
+  "dataset": {
+    "name": "CVE-dataset",
+    "n": 100,
+    "dim": 384,
+    "safe_k_max": 6,
+    "single_thread": true,
+    "n_samples_baseline": 100,
+    "n_samples_optuna": 100,
+    "dimension": 384
+  },
+  "baseline": {
+    "fiedler": 0.00573363185015546,
+    "spectral_gap": 0.012704135729043688,
+    "score": 2.2157222613968894
+  },
+  "optimized": {
+    "fiedler": 0.002798808958432374,
+    "spectral_gap": 0.009191367883770094,
+    "score": 3.2840283207176175
+  },
+  "opt_params": {
+    "eps": 0.11743219433003572,
+    "k": 76,
+    "topk": 78,
+    "p": 1.9611767576309782,
+    "sigma": 0.2901199553116425
+  },
+  "improvement": {
+    "delta_score": 1.068306059320728,
+    "pct_improvement": 48.21480010979447,
+    "fiedler_improvement": -0.002934822891723086,
+    "gap_improvement": -0.003512767845273594
+  },
+  "trial_log": null
+}

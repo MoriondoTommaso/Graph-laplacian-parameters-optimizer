@@ -11,7 +11,7 @@ def build_arrowspace(graph_params: dict,items: np.ndarray):
             .with_sampling("simple", 1.0)
         )
     aspace, gl = builder.build(graph_params, items.copy())
-    print(f"{(time.perf_counter() - t0):2f} ")
+    print(f"build time: {(time.perf_counter() - t0):2f}s ")
     return aspace, gl 
 
 
