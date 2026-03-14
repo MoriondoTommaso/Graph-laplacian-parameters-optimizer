@@ -148,13 +148,13 @@ if __name__ == "__main__":
     threshold = find_convergence_threshold_robust(
         arr           = arr,
         graph_params  = GRAPH_PARAMS,
-        start_size    = 10,
-        step_factor   = 2.0,
-        tolerance_pct = 0.05,
-        seed_spread   = 0.10,
-        patience      = 2,
-        n_seeds       = 3,           
-        max_size_cap  = 100      # Safety net engaged
+        start_size    = 4000,
+        step_factor   = 1.5,
+        tolerance_pct = 0.07,
+        seed_spread   = 0.1,
+        patience      = 3,
+        n_seeds       = 5,           
+        max_size_cap  = 1000000     # Safety net engaged
     )
 
     print(f"\nFinal threshold: {threshold:,} items")
